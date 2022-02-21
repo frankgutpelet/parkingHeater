@@ -3,19 +3,45 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include "base.hpp"
+#include "heaterTimer.hpp"
+#include "Logger.hpp"
+#include "Heater.hpp"
 
 const char* ssid = "WMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 const char* myhostname = "Standheizung";
 const char* curVersion = "0.0.1"; 
+const int relaisPin = 5;
 
 ESP8266WebServer server(80);
 base indexPage(&server);
+heaterTimer hTimer;
+Logger* logger = Logger::instance();
+heater myHeater(relaisPin);
 
 void handleRoot() 
 {
+  logger->Debug(String("Timer: " + indexPage.Get_timer()));
+  if (0 < indexPage.Get_timer().toInt())
+  {
+    hTimer.setTimer(indexPage.Get_timer().toInt());
+  }
+  else
+  {
+    indexPage.Set_timer(String(hTimer.getTimer()));
+  }
+
+  int tempSoll = (int) (10.0 * indexPage.Get_tempSoll().toFloat());
+  if (0 < tempSoll)
+  {
+    myHeater.On(tempSoll, &hTimer);
+  }
+
+  indexPage.Set_tempSoll(String((((double) myHeater.getTenthDegreesShould()) / 10)));
+  indexPage.Set_tempIst(String((((double) myHeater.getTenthDegrees()) / 10)));
   indexPage.Set_version(curVersion);
   indexPage.Render();
+  indexPage.Set_timer(String(0));
 }
 
 void callback() 

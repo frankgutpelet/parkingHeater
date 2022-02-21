@@ -193,7 +193,7 @@ body {\n\
 		</td>\n\
 		<td>\n\
 			<form action=\"submit\" method=\"get\" >\n\
-				<a href=\"http://rikatronicV\" class=\"button2\" >neu laden</a>\n\
+				<a href=\"http://standheizung\" class=\"button2\" >neu laden</a>\n\
 			</form>\n\
 		</td>\n\
 	</tr>\n\
