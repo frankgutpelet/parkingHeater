@@ -9,7 +9,7 @@ char base_text[] = "﻿<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitiona
 	<link rel=\"stylesheet\" style=\"text/css\" href=\"/style.css\">\n\
 <meta content=\"de\" http-equiv=\"Content-Language\" />\n\
 <meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n\
-<title>Rikatronic V</title>\n\
+<title>Viano Standheizung</title>\n\
 <style type=\"text/css\">\n\
 \n\
 \n\
@@ -143,6 +143,21 @@ body {\n\
   background-color: green;\n\
 }\n\
 \n\
+.dotOn {\n\
+  height: 25px;\n\
+  width: 25px;\n\
+  background-color: #f00;\n\
+  border-radius: 50%;\n\
+  display: inline-block;\n\
+}\n\
+.dotOff {\n\
+  height: 25px;\n\
+  width: 25px;\n\
+  background-color: #bbb;\n\
+  border-radius: 50%;\n\
+  display: inline-block;\n\
+}\n\
+\n\
 </style>\n\
 </head>\n\
 <body>\n\
@@ -161,6 +176,14 @@ body {\n\
 		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Timer</strong></td>\n\
 		<td id=\"timerColumn\" class=\"auto-style2\"><strong id=\"timer\"></strong></td>\n\
 	</tr>\n\
+	<tr>\n\
+		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Turbo</strong></td>\n\
+		<td id=\"timerColumn\" class=\"auto-style2\"><strong id=\"turbo\"></strong></td>\n\
+	</tr>\n\
+	<tr>\n\
+		<td class=\"auto-style2\" style=\"width: 484px\"><strong>Status</strong></td>\n\
+		<td id=\"timerColumn\" class=\"auto-style2\"><strong id=\"state\"></strong><td><span id=\"burn\" class=\"dotOff\"></span></td><td><span id=\"burnTurbo\" class=\"dotOff\"></span></td>\n\
+	</tr>\n\
 </table>\n\
 </p>\n\
 \n\
@@ -168,7 +191,7 @@ body {\n\
 	<tr>\n\
 		 <p class=\"auto-style2\">Timer:</p>\n\
 		<div class=\"slidecontainer\">\n\
-			<input id=\"slider\" type=\"range\" min=\"1\" max=\"60\" value={{ timer }} class=\"slider\" id=\"timer\" onchange=\"sliderChange()\">\n\
+			<input id=\"slider\" type=\"range\" min=\"1\" max=\"90\" value={{ timer }} class=\"slider\" id=\"timer\" onchange=\"sliderChange()\">\n\
 		</div>\n\
 		</p>\n\
 	</tr>\n\
@@ -178,7 +201,7 @@ body {\n\
 	<tr>\n\
 		<p class=\"auto-style2\">Temperatur:</p>\n\
 		<div class=\"slidecontainer\">\n\
-			<input id=\"slider2\" type=\"range\" min=\"1\" max=\"60\" value={{ timer }} class=\"slider\" id=\"temp\" onchange=\"slider2Change()\">\n\
+			<input id=\"slider2\" type=\"range\" min=\"20\" max=\"60\" value={{ timer }} class=\"slider\" id=\"temp\" onchange=\"slider2Change()\">\n\
 		</div>\n\
 		</p>\n\
 	</tr>\n\
@@ -196,6 +219,11 @@ body {\n\
 				<a href=\"http://standheizung\" class=\"button2\" >neu laden</a>\n\
 			</form>\n\
 		</td>\n\
+		<td>\n\
+			<form action=\"submit\" method=\"get\" >\n\
+				<p class=\"button2\" type=\"submit\" onclick=\"turbo()\">Turbo</p>\n\
+			</form>\n\
+		</td>\n\
 	</tr>\n\
 </table>\n\
 \n\
@@ -210,23 +238,83 @@ body {\n\
 		\"tempIst\" : \"0\",            \n\
 		\"tempSoll\" : \"0\",           \n\
 		\"calibrated\" : \"0\",         \n\
-		\"version\" : \"0\"}            \n\
+		\"version\" : \"0\",            \n\
+		\"state\" : \"OFF\",            \n\
+		\"heating\" : \"ON\",           \n\
+		\"turbo\" : \"OFF\"}            \n\
+\n\
+	if (values.heating == \"ON\")\n\
+	{\n\
+		document.getElementById(\"burn\").classList.add(\"dotOn\")\n\
+		document.getElementById(\"burn\").classList.remove(\"dotOff\")\n\
+		if (\"ON\" == values.turbo)\n\
+		{\n\
+			document.getElementById(\"burnTurbo\").classList.add(\"dotOn\")\n\
+			document.getElementById(\"burnTurbo\").classList.remove(\"dotOff\")\n\
+		}\n\
+		else\n\
+		{\n\
+			document.getElementById(\"burnTurbo\").classList.add(\"dotOff\")\n\
+			document.getElementById(\"burnTurbo\").classList.remove(\"dotOn\")\n\
+		}\n\
+	}\n\
+	else\n\
+	{\n\
+		document.getElementById(\"burn\").classList.add(\"dotOff\")\n\
+		document.getElementById(\"burn\").classList.remove(\"dotOn\")\n\
+		document.getElementById(\"burnTurbo\").classList.add(\"dotOff\")\n\
+		document.getElementById(\"burnTurbo\").classList.remove(\"dotOn\")\n\
+\n\
+	}\n\
+\n\
+	if (values.timer >= 61)\n\
+	{\n\
+		document.getElementById(\"timer\").innerHTML = \"Dauer\"\n\
+	}\n\
+	else\n\
+	{\n\
+		document.getElementById(\"timer\").innerHTML = values.timer + \"min\"\n\
+	}\n\
 \n\
 	document.getElementById(\"version\").innerHTML = \"Version: \" + values.version\n\
 		\n\
-	document.getElementById(\"timer\").innerHTML = values.timer + \"min\"\n\
+\n\
 	document.getElementById(\"slider\").value = values.timer\n\
-	document.getElementById(\"slider2\").value = values.tempSoll\n\
+	document.getElementById(\"slider2\").value = values.tempSoll * 2\n\
 	document.getElementById(\"tempIst\").innerHTML = values.tempIst + \"°C\"\n\
 	document.getElementById(\"tempSoll\").innerHTML = values.tempSoll + \"°C\"\n\
+	document.getElementById(\"state\").innerHTML = values.state\n\
+	document.getElementById(\"turbo\").innerHTML = values.turbo\n\
 	document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
 \n\
+	function turbo()\n\
+	{\n\
+		if(\"OFF\" == values.turbo)\n\
+		{\n\
+			values.turbo = \"ON\"\n\
+		}\n\
+		else\n\
+		{\n\
+			values.turbo = \"OFF\"\n\
+		}\n\
+		document.getElementById(\"turbo\").innerHTML = values.turbo + \" (übernehmen)\"\n\
+		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
+	}\n\
 	function sliderChange()\n\
 	{\n\
 \n\
 		values.timer = Math.round(document.getElementById(\"slider\").value)\n\
-		document.getElementById(\"timer\").innerHTML = values.timer + \"min (übernehmen)\"\n\
-		document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
+		if (values.timer > 60)\n\
+		{\n\
+			values.timer = 61\n\
+			document.getElementById(\"timer\").innerHTML = \"Dauer (übernehmen)\"\n\
+			document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
+		}\n\
+		else\n\
+		{\n\
+			document.getElementById(\"timer\").innerHTML = values.timer + \"min (übernehmen)\"\n\
+			document.getElementById(\"submitBtn\").value = JSON.stringify(values)\n\
+		}\n\
 	}\n\
 	function slider2Change()\n\
 	{\n\
@@ -258,11 +346,14 @@ void base::Submit_Callback(void)
 	}
 	else
 	{
-		this->version = obj["version"].as < String > ();
-		this->tempSoll = obj["tempSoll"].as < String > ();
-		this->tempIst = obj["tempIst"].as < String > ();
-		this->calibrated = obj["calibrated"].as < String > ();
 		this->timer = obj["timer"].as < String > ();
+		this->tempIst = obj["tempIst"].as < String > ();
+		this->tempSoll = obj["tempSoll"].as < String > ();
+		this->heating = obj["heating"].as < String > ();
+		this->turbo = obj["turbo"].as < String > ();
+		this->version = obj["version"].as < String > ();
+		this->state = obj["state"].as < String > ();
+		this->calibrated = obj["calibrated"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -276,25 +367,15 @@ void base::SetCallback_submit (void (*callback)(void))
 	this->submit_UserCallback = callback;
 }
 
-void base::Set_version (String value)
+void base::Set_timer (String value)
 {
-	this->version = value;
-	this->Replace("version", this->version);
+	this->timer = value;
+	this->Replace("timer", this->timer);
 }
 
-String base::Get_version ( void )
+String base::Get_timer ( void )
 {
-	return this->version;
-}
-void base::Set_tempSoll (String value)
-{
-	this->tempSoll = value;
-	this->Replace("tempSoll", this->tempSoll);
-}
-
-String base::Get_tempSoll ( void )
-{
-	return this->tempSoll;
+	return this->timer;
 }
 void base::Set_tempIst (String value)
 {
@@ -306,6 +387,56 @@ String base::Get_tempIst ( void )
 {
 	return this->tempIst;
 }
+void base::Set_tempSoll (String value)
+{
+	this->tempSoll = value;
+	this->Replace("tempSoll", this->tempSoll);
+}
+
+String base::Get_tempSoll ( void )
+{
+	return this->tempSoll;
+}
+void base::Set_heating (String value)
+{
+	this->heating = value;
+	this->Replace("heating", this->heating);
+}
+
+String base::Get_heating ( void )
+{
+	return this->heating;
+}
+void base::Set_turbo (String value)
+{
+	this->turbo = value;
+	this->Replace("turbo", this->turbo);
+}
+
+String base::Get_turbo ( void )
+{
+	return this->turbo;
+}
+void base::Set_version (String value)
+{
+	this->version = value;
+	this->Replace("version", this->version);
+}
+
+String base::Get_version ( void )
+{
+	return this->version;
+}
+void base::Set_state (String value)
+{
+	this->state = value;
+	this->Replace("state", this->state);
+}
+
+String base::Get_state ( void )
+{
+	return this->state;
+}
 void base::Set_calibrated (String value)
 {
 	this->calibrated = value;
@@ -315,16 +446,6 @@ void base::Set_calibrated (String value)
 String base::Get_calibrated ( void )
 {
 	return this->calibrated;
-}
-void base::Set_timer (String value)
-{
-	this->timer = value;
-	this->Replace("timer", this->timer);
-}
-
-String base::Get_timer ( void )
-{
-	return this->timer;
 }
 void base::Render( void )
 {

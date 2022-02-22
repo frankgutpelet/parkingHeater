@@ -10,21 +10,26 @@
 const char* ssid = "WMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 const char* myhostname = "Standheizung";
-const char* curVersion = "0.0.1"; 
-const int relaisPin = 5;
+const char* curVersion = "1.0.0"; 
+const int relais1Pin = 16;
+const int relais2Pin = 5;
 
 ESP8266WebServer server(80);
 base indexPage(&server);
 heaterTimer hTimer;
 Logger* logger = Logger::instance();
-heater myHeater(relaisPin);
+heater myHeater(relais1Pin, relais2Pin);
 
 void handleRoot() 
 {
+  char tmpShould[5];
+  char tmpIs[5];
+  
   logger->Debug(String("Timer: " + indexPage.Get_timer()));
   if (0 < indexPage.Get_timer().toInt())
   {
     hTimer.setTimer(indexPage.Get_timer().toInt());
+    myHeater.On(&hTimer);
   }
   else
   {
@@ -34,14 +39,56 @@ void handleRoot()
   int tempSoll = (int) (10.0 * indexPage.Get_tempSoll().toFloat());
   if (0 < tempSoll)
   {
-    myHeater.On(tempSoll, &hTimer);
+    myHeater.SetTemp(tempSoll);
   }
 
-  indexPage.Set_tempSoll(String((((double) myHeater.getTenthDegreesShould()) / 10)));
-  indexPage.Set_tempIst(String((((double) myHeater.getTenthDegrees()) / 10)));
+  if (myHeater.IsOn())
+  {
+    logger->Debug("Heater on");
+    indexPage.Set_state("ON");
+  }
+  else
+  {
+    logger->Debug("Heater off");
+    indexPage.Set_state("OFF");
+  }
+
+  if (myHeater.IsHeating())
+  {
+    indexPage.Set_heating("ON");
+  }
+  else
+  {
+    indexPage.Set_heating("OFF");
+  }
+  if (String("ON") == indexPage.Get_turbo())
+  {
+    logger->Debug("Turbo on");
+    myHeater.TurboOn();
+  }
+  else
+  {
+    logger->Debug("Turbo off");
+    myHeater.TurboOff();
+  }
+  
+  sprintf(tmpShould, "%.1f", (double) myHeater.getTenthDegreesShould()/10);
+  sprintf(tmpIs, "%.1f", (double) myHeater.getTenthDegrees()/10);
+  
+  indexPage.Set_tempSoll(tmpShould);
+  indexPage.Set_tempIst(tmpIs);
   indexPage.Set_version(curVersion);
+  indexPage.Set_timer(String(hTimer.getTimer()));
+  if (myHeater.TurboActive())
+  {
+    indexPage.Set_turbo("ON");
+  }
+  else 
+  {
+    indexPage.Set_turbo("OFF");
+  }
+
   indexPage.Render();
-  indexPage.Set_timer(String(0));
 }
 
 void callback() 

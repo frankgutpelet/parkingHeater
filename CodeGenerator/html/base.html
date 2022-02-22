@@ -139,6 +139,21 @@ body {
   background-color: green;
 }
 
+.dotOn {
+  height: 25px;
+  width: 25px;
+  background-color: #f00;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dotOff {
+  height: 25px;
+  width: 25px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+
 </style>
 </head>
 <body>
@@ -157,6 +172,14 @@ body {
 		<td class="auto-style2" style="width: 484px"><strong>Timer</strong></td>
 		<td id="timerColumn" class="auto-style2"><strong id="timer"></strong></td>
 	</tr>
+	<tr>
+		<td class="auto-style2" style="width: 484px"><strong>Turbo</strong></td>
+		<td id="timerColumn" class="auto-style2"><strong id="turbo"></strong></td>
+	</tr>
+	<tr>
+		<td class="auto-style2" style="width: 484px"><strong>Status</strong></td>
+		<td id="timerColumn" class="auto-style2"><strong id="state"></strong><td><span id="burn" class="dotOff"></span></td><td><span id="burnTurbo" class="dotOff"></span></td>
+	</tr>
 </table>
 </p>
 
@@ -164,7 +187,7 @@ body {
 	<tr>
 		 <p class="auto-style2">Timer:</p>
 		<div class="slidecontainer">
-			<input id="slider" type="range" min="1" max="60" value={{ timer }} class="slider" id="timer" onchange="sliderChange()">
+			<input id="slider" type="range" min="1" max="90" value={{ timer }} class="slider" id="timer" onchange="sliderChange()">
 		</div>
 		</p>
 	</tr>
@@ -174,7 +197,7 @@ body {
 	<tr>
 		<p class="auto-style2">Temperatur:</p>
 		<div class="slidecontainer">
-			<input id="slider2" type="range" min="1" max="60" value={{ timer }} class="slider" id="temp" onchange="slider2Change()">
+			<input id="slider2" type="range" min="20" max="60" value={{ timer }} class="slider" id="temp" onchange="slider2Change()">
 		</div>
 		</p>
 	</tr>
@@ -192,6 +215,11 @@ body {
 				<a href="http://standheizung" class="button2" >neu laden</a>
 			</form>
 		</td>
+		<td>
+			<form action="submit" method="get" >
+				<p class="button2" type="submit" onclick="turbo()">Turbo</p>
+			</form>
+		</td>
 	</tr>
 </table>
 
@@ -206,23 +234,83 @@ body {
 		"tempIst" : "0",
 		"tempSoll" : "0",
 		"calibrated" : "0",
-		"version" : "0"}
+		"version" : "0",
+		"state" : "OFF",
+		"heating" : "ON",
+		"turbo" : "OFF"}
+
+	if (values.heating == "ON")
+	{
+		document.getElementById("burn").classList.add("dotOn")
+		document.getElementById("burn").classList.remove("dotOff")
+		if ("ON" == values.turbo)
+		{
+			document.getElementById("burnTurbo").classList.add("dotOn")
+			document.getElementById("burnTurbo").classList.remove("dotOff")
+		}
+		else
+		{
+			document.getElementById("burnTurbo").classList.add("dotOff")
+			document.getElementById("burnTurbo").classList.remove("dotOn")
+		}
+	}
+	else
+	{
+		document.getElementById("burn").classList.add("dotOff")
+		document.getElementById("burn").classList.remove("dotOn")
+		document.getElementById("burnTurbo").classList.add("dotOff")
+		document.getElementById("burnTurbo").classList.remove("dotOn")
+
+	}
+
+	if (values.timer >= 61)
+	{
+		document.getElementById("timer").innerHTML = "Dauer"
+	}
+	else
+	{
+		document.getElementById("timer").innerHTML = values.timer + "min"
+	}
 
 	document.getElementById("version").innerHTML = "Version: " + values.version
 		
-	document.getElementById("timer").innerHTML = values.timer + "min"
+
 	document.getElementById("slider").value = values.timer
-	document.getElementById("slider2").value = values.tempSoll
+	document.getElementById("slider2").value = values.tempSoll * 2
 	document.getElementById("tempIst").innerHTML = values.tempIst + "°C"
 	document.getElementById("tempSoll").innerHTML = values.tempSoll + "°C"
+	document.getElementById("state").innerHTML = values.state
+	document.getElementById("turbo").innerHTML = values.turbo
 	document.getElementById("submitBtn").value = JSON.stringify(values)
 
+	function turbo()
+	{
+		if("OFF" == values.turbo)
+		{
+			values.turbo = "ON"
+		}
+		else
+		{
+			values.turbo = "OFF"
+		}
+		document.getElementById("turbo").innerHTML = values.turbo + " (übernehmen)"
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+	}
 	function sliderChange()
 	{
 
 		values.timer = Math.round(document.getElementById("slider").value)
-		document.getElementById("timer").innerHTML = values.timer + "min (übernehmen)"
-		document.getElementById("submitBtn").value = JSON.stringify(values)
+		if (values.timer > 60)
+		{
+			values.timer = 61
+			document.getElementById("timer").innerHTML = "Dauer (übernehmen)"
+			document.getElementById("submitBtn").value = JSON.stringify(values)
+		}
+		else
+		{
+			document.getElementById("timer").innerHTML = values.timer + "min (übernehmen)"
+			document.getElementById("submitBtn").value = JSON.stringify(values)
+		}
 	}
 	function slider2Change()
 	{
