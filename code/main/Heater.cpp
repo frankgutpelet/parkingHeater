@@ -1,5 +1,7 @@
 #include "Heater.hpp"
 
+#define TURBO_PWM_VALUE 150
+#define SILENT_PWM_VALUE 100
 static const unsigned int tresholdTenthDegrees = 2;
 void timer2Callback(void *pArg);
 
@@ -85,9 +87,10 @@ void heater::timercb(void)
 	else if ((tenthdegrees <= (this->tenthDegreesShould - tresholdTenthDegrees)))
 	{
 		digitalWrite(this->relais1Pin, HIGH);
+    analogWrite(this->relais2Pin, SILENT_PWM_VALUE);
     if (this->turbo)
     {
-      digitalWrite(this->relais2Pin, HIGH);
+      digitalWrite(this->relais2Pin, TURBO_PWM_VALUE);
     }
 		this->isHeating = true;
     logger->Debug("heating ON");

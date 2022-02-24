@@ -1,7 +1,7 @@
 #include "base.hpp"
 #include <ArduinoJson.h>
 
-StaticJsonDocument < 300 > doc;
+StaticJsonDocument < 300 > base_doc;
 char base_text[] = "﻿<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n\
 <html xmlns=\"http://www.w3.org/1999/xhtml\">\n\
 \n\
@@ -224,6 +224,11 @@ body {\n\
 				<p class=\"button2\" type=\"submit\" onclick=\"turbo()\">Turbo</p>\n\
 			</form>\n\
 		</td>\n\
+		<td>\n\
+			<form action=\"submit\" method=\"get\" >\n\
+				<a href=\"http://settings\" class=\"button2\" >neu laden</a>\n\
+			</form>\n\
+		</td>\n\
 	</tr>\n\
 </table>\n\
 \n\
@@ -335,9 +340,9 @@ base::base(ESP8266WebServer* server)
 void base::Submit_Callback(void)
 {
 	String jsonstring = this->server->arg("action");
-	DeserializationError error = deserializeJson(doc, jsonstring);
+	DeserializationError error = deserializeJson(base_doc, jsonstring);
 	Serial.println(jsonstring);
-	JsonObject obj = doc.as < JsonObject > ();
+	JsonObject obj = base_doc.as < JsonObject > ();
 
 	if (error)
 	{
@@ -346,14 +351,14 @@ void base::Submit_Callback(void)
 	}
 	else
 	{
-		this->timer = obj["timer"].as < String > ();
-		this->tempIst = obj["tempIst"].as < String > ();
 		this->tempSoll = obj["tempSoll"].as < String > ();
-		this->heating = obj["heating"].as < String > ();
+		this->tempIst = obj["tempIst"].as < String > ();
+		this->timer = obj["timer"].as < String > ();
 		this->turbo = obj["turbo"].as < String > ();
-		this->version = obj["version"].as < String > ();
-		this->state = obj["state"].as < String > ();
 		this->calibrated = obj["calibrated"].as < String > ();
+		this->state = obj["state"].as < String > ();
+		this->version = obj["version"].as < String > ();
+		this->heating = obj["heating"].as < String > ();
 
 	}
 	if (NULL != this->submit_UserCallback)
@@ -367,15 +372,15 @@ void base::SetCallback_submit (void (*callback)(void))
 	this->submit_UserCallback = callback;
 }
 
-void base::Set_timer (String value)
+void base::Set_tempSoll (String value)
 {
-	this->timer = value;
-	this->Replace("timer", this->timer);
+	this->tempSoll = value;
+	this->Replace("tempSoll", this->tempSoll);
 }
 
-String base::Get_timer ( void )
+String base::Get_tempSoll ( void )
 {
-	return this->timer;
+	return this->tempSoll;
 }
 void base::Set_tempIst (String value)
 {
@@ -387,25 +392,15 @@ String base::Get_tempIst ( void )
 {
 	return this->tempIst;
 }
-void base::Set_tempSoll (String value)
+void base::Set_timer (String value)
 {
-	this->tempSoll = value;
-	this->Replace("tempSoll", this->tempSoll);
+	this->timer = value;
+	this->Replace("timer", this->timer);
 }
 
-String base::Get_tempSoll ( void )
+String base::Get_timer ( void )
 {
-	return this->tempSoll;
-}
-void base::Set_heating (String value)
-{
-	this->heating = value;
-	this->Replace("heating", this->heating);
-}
-
-String base::Get_heating ( void )
-{
-	return this->heating;
+	return this->timer;
 }
 void base::Set_turbo (String value)
 {
@@ -417,15 +412,15 @@ String base::Get_turbo ( void )
 {
 	return this->turbo;
 }
-void base::Set_version (String value)
+void base::Set_calibrated (String value)
 {
-	this->version = value;
-	this->Replace("version", this->version);
+	this->calibrated = value;
+	this->Replace("calibrated", this->calibrated);
 }
 
-String base::Get_version ( void )
+String base::Get_calibrated ( void )
 {
-	return this->version;
+	return this->calibrated;
 }
 void base::Set_state (String value)
 {
@@ -437,15 +432,25 @@ String base::Get_state ( void )
 {
 	return this->state;
 }
-void base::Set_calibrated (String value)
+void base::Set_version (String value)
 {
-	this->calibrated = value;
-	this->Replace("calibrated", this->calibrated);
+	this->version = value;
+	this->Replace("version", this->version);
 }
 
-String base::Get_calibrated ( void )
+String base::Get_version ( void )
 {
-	return this->calibrated;
+	return this->version;
+}
+void base::Set_heating (String value)
+{
+	this->heating = value;
+	this->Replace("heating", this->heating);
+}
+
+String base::Get_heating ( void )
+{
+	return this->heating;
 }
 void base::Render( void )
 {

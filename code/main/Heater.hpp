@@ -17,6 +17,8 @@ class heater
     void TurboOn(void){this->turbo = true;}   
     void TurboOff(void){this->turbo = false;}
     bool TurboActive(void){return this->turbo;}
+
+    void setSpeeds(int silent, int turbo){this->speedSilent = silent; this->speedTurbo = turbo;}
 		
 		unsigned int getTenthDegrees (void);
     unsigned int getTenthDegreesShould (void);
@@ -39,4 +41,6 @@ class heater
     bool isHeating;
     unsigned int tmpValuesNo = 0;
     unsigned int tmpValues[MAX_VALUES];
+    int speedSilent = 100;
+    int speedTurbo = 200;
 };
