@@ -153,7 +153,6 @@ def parseHtml(filename):
 def main():
     # Use a breakpoint in the code line below to debug your script.
     parseHtml("html/base.html")
-    parseHtml("html/settings.html")
 
     for side in htmlsides:
         printClass(side)
