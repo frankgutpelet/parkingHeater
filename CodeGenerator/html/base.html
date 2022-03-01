@@ -221,6 +221,37 @@ body {
 			</form>
 		</td>
 	</tr>
+	<tr>
+		<td>
+			<form action="submit" method="get" >
+				<p class="button2" type="submit" onclick="Off()">Aus</p>
+			</form>
+		</td>
+		<td>
+			<form action="submit" method="get" >
+				<p class="button2" type="submit" onclick="Settings()">Settings</p>
+			</form>
+		</td>
+	</tr>
+</table>
+</p>
+
+<table  id="settings" class="auto-style3" style="width: 100%" >
+	<tr>
+		 <p class="auto-style2" >Speed Silent</p>
+		<div class="slidecontainer">
+			<input id="sliderSpeedSilent" type="range" min="1" max="90" value={{ timer }} class="slider" id="timer" onchange="sliderSpeedSilentChange()">
+		</div>
+		</p>
+	</tr>
+</p>
+	<tr>
+		<p class="auto-style2">Speed Turbo</p>
+		<div class="slidecontainer">
+			<input id="sliderSpeedTurbo" type="range" min="20" max="60" value={{ timer }} class="slider" id="temp" onchange="sliderSpeedTurboChange()">
+		</div>
+		</p>
+	</tr>
 </table>
 
 
@@ -237,7 +268,9 @@ body {
 		"version" : "0",
 		"state" : "OFF",
 		"heating" : "ON",
-		"turbo" : "OFF"}
+		"turbo" : "OFF",
+		"speedSilent : 0,
+		"speedTurbo : 0}
 
 	if (values.heating == "ON")
 	{
@@ -281,8 +314,15 @@ body {
 	document.getElementById("tempSoll").innerHTML = values.tempSoll + "°C"
 	document.getElementById("state").innerHTML = values.state
 	document.getElementById("turbo").innerHTML = values.turbo
+	document.getElementById("sliderSpeedSilent").value = values.speedSilent
+	document.getElementById("sliderSpeedTurbo").value = values.speedTurbo
 	document.getElementById("submitBtn").value = JSON.stringify(values)
+	document.getElementById("settings").display = "none"
 
+	function Off()
+	{
+		values.timer = 0
+	}
 	function turbo()
 	{
 		if("OFF" == values.turbo)
@@ -318,6 +358,20 @@ body {
 		document.getElementById("tempSoll").innerHTML = values.tempSoll + "°C (übernehmen)"
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 
+	}
+	function sliderSpeedSilentChange()
+	{
+		values.speedSilent = document.getElementById("sliderSpeedSilent").value
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+	}
+	function sliderSpeedTurboChange()
+	{
+		values.speedTurbo = document.getElementById("sliderSpeedTurbo").value
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+	}
+	function Settings()
+	{
+		document.getElementById("settings").display = ""
 	}
 
 </script>
