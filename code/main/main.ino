@@ -15,21 +15,28 @@ const char* ssid = "WMOSKITO";
 const char* password = ".ubX54bVSt#vxW11m.";
 const char* myhostname = "Standheizung";
 const char* curVersion = "2.0.0"; 
-const int relais1Pin = 16;
-const int relais2Pin = 5;
+const int relais1Pin = 5;
+const int relais2Pin = 4;
+const int relaisFanPin = 16;
 
 ESP8266WebServer server(80);
 base indexPage(&server);
 heaterTimer hTimer;
 Logger* logger = Logger::instance();
-heater myHeater(relais1Pin, relais2Pin);
+heater myHeater(relais1Pin, relais2Pin, relaisFanPin, &indexPage);
 
 void handleRoot() 
 {
   char tmpShould[5];
   char tmpIs[5];
   
-  logger->Debug(String("Timer: " + indexPage.Get_timer()));
+  if (String("OFF") == indexPage.Get_state())
+  {
+    logger->Debug("Switch Off");
+    myHeater.Off();
+    indexPage.Render();
+    return;
+  }
   if (0 < indexPage.Get_timer().toInt())
   {
     hTimer.setTimer(indexPage.Get_timer().toInt());
@@ -74,8 +81,7 @@ void handleRoot()
   {
     logger->Debug("Turbo off");
     myHeater.TurboOff();
-  }
-  
+  }  
   sprintf(tmpShould, "%.1f", (double) myHeater.getTenthDegreesShould()/10);
   sprintf(tmpIs, "%.1f", (double) myHeater.getTenthDegrees()/10);
   
@@ -95,11 +101,6 @@ void handleRoot()
   indexPage.Render();
 }
 
-void callback() 
-{ 
-  handleRoot();
-}
-
 void handleNotFound() {
   String message = "File Not Found\n\n";
   message += "URI: ";
@@ -115,6 +116,15 @@ void handleNotFound() {
   server.send(404, "text/plain", message);
 }
 
+void Render()
+{
+  if (NULL != logger)
+  {
+    logger->Debug("Render");
+  }
+  indexPage.Render();
+}
+
 void setup(void) {
  
   Serial.begin(115200);
@@ -124,9 +134,9 @@ void setup(void) {
   dnsServer.start(DNS_PORT, "*", apIP);
 
 
-  server.on("/", handleRoot);
+  server.on("/", Render);
     server.send(200, "text/plain", "this works as well");
-  indexPage.SetCallback_submit(callback); 
+  indexPage.SetCallback_submit(handleRoot); 
   
   server.onNotFound(handleNotFound);
 

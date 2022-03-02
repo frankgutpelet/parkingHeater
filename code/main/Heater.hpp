@@ -2,14 +2,16 @@
 #include <Arduino.h>
 #include "heaterTimer.hpp"
 #include "Logger.hpp"
+#include "base.hpp"
 
 #pragma once
 #define MAX_VALUES 10
+#define FAN_DELAY_SEC 60
 
 class heater
 {
 	public:
-		heater(int relais1Pin, int relais2Pin);
+		heater(int relais1Pin, int relais2Pin, int relaisFanPin, base* viewer);
 		
 		void On(heaterTimer* timer);
     void SetTemp(unsigned int tenthDegrees);
@@ -33,6 +35,7 @@ class heater
 		unsigned int tenthDegreesShould;
 		int relais1Pin;
     int relais2Pin;
+    int relaisFanPin;
     heaterTimer* timer;
     os_timer_t Timer2; 
     Logger* logger;
@@ -43,4 +46,6 @@ class heater
     unsigned int tmpValues[MAX_VALUES];
     int speedSilent = 100;
     int speedTurbo = 200;
+    bool fanDelay = false;
+    base* viewer;
 };

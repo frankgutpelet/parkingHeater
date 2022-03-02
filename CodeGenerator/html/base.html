@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-	<link rel="stylesheet" style="text/css" href="/style.css">
+	<link rel="stylesheet" style="text/css">
 <meta content="de" http-equiv="Content-Language" />
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <title>Viano Standheizung</title>
@@ -18,20 +18,6 @@ body {
 
 }
 
-.button {
-  display: inline-block;
-  padding: 15px 25px;
-  font-size: 24px;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  outline: none;
-  color: #fff;
-  background-color: silver;
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 9px darkblue;
-}
 .button2 {
   display: inline-block;
   padding: 30px 45px;
@@ -45,15 +31,6 @@ body {
   border: none;
   border-radius: 10px;
   box-shadow: 0 9px darkblue;
-}
-.button:hover {
-	background-color: blueviolet
-}
-
-.button:active {
-  background-color: #3e8e41;
-  box-shadow: 0 5px #666;
-  transform: translateY(4px);
 }
 .auto-style-headline {
     text-transform: uppercase;
@@ -71,12 +48,6 @@ body {
     1px 18px 6px rgba(16,16,16,0.4),
     1px 22px 10px rgba(16,16,16,0.2),
     1px 25px 35px rgba(16,16,16,0.2);
-}
-
-.auto-style1 {
-	font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
-	font-size: xx-large;
-	color: #FFFFFF;
 }
 .auto-style2 {
     font-family: verdana;
@@ -97,9 +68,6 @@ body {
     text-shadow: 1px 1px 1px #919191,
     1px 2px 1px rgba(16,16,16,0.4),
     1px 4px 2px rgba(16,16,16,0.2);
-}
-.auto-style3 {
-	color: #FF0000;
 }
 .auto-style3 {
 	border-style: solid;
@@ -123,22 +91,6 @@ body {
   background: darkblue;
   cursor: pointer;
 }
-#CalibrationProgress {
-  width: 50%;
-  background-color: grey;
-  bottom: 20%;
-  position: fixed;
-  float: right;
-  visible: false;
-  box-shadow: 8px 8px 5px #444;
-}
-
-#CalibrationBar {
-  width: 1%;
-  height: 30px;
-  background-color: green;
-}
-
 .dotOn {
   height: 25px;
   width: 25px;
@@ -153,7 +105,6 @@ body {
   border-radius: 50%;
   display: inline-block;
 }
-
 </style>
 </head>
 <body>
@@ -182,7 +133,6 @@ body {
 	</tr>
 </table>
 </p>
-
 <table  class="auto-style3" style="width: 100%">
 	<tr>
 		 <p class="auto-style2">Timer:</p>
@@ -191,9 +141,7 @@ body {
 		</div>
 		</p>
 	</tr>
-</table>
 </p>
-<table  class="auto-style3" style="width: 100%">
 	<tr>
 		<p class="auto-style2">Temperatur:</p>
 		<div class="slidecontainer">
@@ -212,7 +160,7 @@ body {
 		</td>
 		<td>
 			<form action="submit" method="get" >
-				<a href="http://standheizung" class="button2" >neu laden</a>
+				<p class="button2" type="submit" onclick="Off()">Aus</p>
 			</form>
 		</td>
 		<td>
@@ -221,110 +169,82 @@ body {
 			</form>
 		</td>
 	</tr>
-	<tr>
-		<td>
-			<form action="submit" method="get" >
-				<p class="button2" type="submit" onclick="Off()">Aus</p>
-			</form>
-		</td>
-		<td>
-			<form action="submit" method="get" >
-				<p class="button2" type="submit" onclick="Settings()">Settings</p>
-			</form>
-		</td>
-	</tr>
 </table>
-</p>
-
-<table  id="settings" class="auto-style3" style="width: 100%" >
-	<tr>
-		 <p class="auto-style2" >Speed Silent</p>
-		<div class="slidecontainer">
-			<input id="sliderSpeedSilent" type="range" min="1" max="90" value={{ timer }} class="slider" id="timer" onchange="sliderSpeedSilentChange()">
-		</div>
-		</p>
-	</tr>
-</p>
-	<tr>
-		<p class="auto-style2">Speed Turbo</p>
-		<div class="slidecontainer">
-			<input id="sliderSpeedTurbo" type="range" min="20" max="60" value={{ timer }} class="slider" id="temp" onchange="sliderSpeedTurboChange()">
-		</div>
-		</p>
-	</tr>
-</table>
-
-
 </body>
-
 </html>
 <script>
 
-	var values = {
-		"timer" : "0",
-		"tempIst" : "0",
-		"tempSoll" : "0",
-		"calibrated" : "0",
-		"version" : "0",
-		"state" : "OFF",
-		"heating" : "ON",
-		"turbo" : "OFF",
-		"speedSilent : 0,
-		"speedTurbo : 0}
+	const queryString = window.location.search;
+	const urlParams = new URLSearchParams(queryString);
+	console.log(urlParams)
+	console.log(urlParams.get("tempIst"))
 
-	if (values.heating == "ON")
+	var values = {
+		"timer" : "dynamic",
+		"tempIst" : "dynamic",
+		"tempSoll" : "dynamic",
+		"calibrated" : "dynamic",
+		"version" : "dynamic",
+		"state" : "dynamic",
+		"heating" : "dynamic",
+		"turbo" : "dynamic"}
+
+	document.getElementById("version").innerHTML = "Version: " + values.version
+	updateValues()
+	interval = setInterval(updateValues, 1000)
+
+	function UpdateAll()
 	{
-		document.getElementById("burn").classList.add("dotOn")
-		document.getElementById("burn").classList.remove("dotOff")
-		if ("ON" == values.turbo)
+		document.getElementById("slider").value = values.timer
+		document.getElementById("slider2").value = values.tempSoll * 2
+		document.getElementById("tempIst").innerHTML = values.tempIst + "°C"
+		document.getElementById("tempSoll").innerHTML = values.tempSoll + "°C"
+		document.getElementById("state").innerHTML = values.state
+		document.getElementById("turbo").innerHTML = values.turbo
+		document.getElementById("submitBtn").value = JSON.stringify(values)
+		if (values.timer >= 61)
 		{
-			document.getElementById("burnTurbo").classList.add("dotOn")
-			document.getElementById("burnTurbo").classList.remove("dotOff")
+			document.getElementById("timer").innerHTML = "Dauer"
 		}
 		else
 		{
+			document.getElementById("timer").innerHTML = values.timer + "min"
+		}
+		if (values.heating == "ON")
+		{
+			document.getElementById("burn").classList.add("dotOn")
+			document.getElementById("burn").classList.remove("dotOff")
+			if ("ON" == values.turbo)
+			{
+				document.getElementById("burnTurbo").classList.add("dotOn")
+				document.getElementById("burnTurbo").classList.remove("dotOff")
+			}
+			else
+			{
+				document.getElementById("burnTurbo").classList.add("dotOff")
+				document.getElementById("burnTurbo").classList.remove("dotOn")
+			}
+		}
+		else
+		{
+			document.getElementById("burn").classList.add("dotOff")
+			document.getElementById("burn").classList.remove("dotOn")
 			document.getElementById("burnTurbo").classList.add("dotOff")
 			document.getElementById("burnTurbo").classList.remove("dotOn")
+
 		}
 	}
-	else
-	{
-		document.getElementById("burn").classList.add("dotOff")
-		document.getElementById("burn").classList.remove("dotOn")
-		document.getElementById("burnTurbo").classList.add("dotOff")
-		document.getElementById("burnTurbo").classList.remove("dotOn")
-
-	}
-
-	if (values.timer >= 61)
-	{
-		document.getElementById("timer").innerHTML = "Dauer"
-	}
-	else
-	{
-		document.getElementById("timer").innerHTML = values.timer + "min"
-	}
-
-	document.getElementById("version").innerHTML = "Version: " + values.version
-		
-
-	document.getElementById("slider").value = values.timer
-	document.getElementById("slider2").value = values.tempSoll * 2
-	document.getElementById("tempIst").innerHTML = values.tempIst + "°C"
-	document.getElementById("tempSoll").innerHTML = values.tempSoll + "°C"
-	document.getElementById("state").innerHTML = values.state
-	document.getElementById("turbo").innerHTML = values.turbo
-	document.getElementById("sliderSpeedSilent").value = values.speedSilent
-	document.getElementById("sliderSpeedTurbo").value = values.speedTurbo
-	document.getElementById("submitBtn").value = JSON.stringify(values)
-	document.getElementById("settings").display = "none"
-
 	function Off()
 	{
-		values.timer = 0
+		clearInterval(interval)
+		values.state = "OFF"
+		document.getElementById("state").innerHTML = "OFF (übernehmen)"
+		document.getElementById("submitBtn").value = JSON.stringify(values)
 	}
+
 	function turbo()
 	{
+		clearInterval(interval)
 		if("OFF" == values.turbo)
 		{
 			values.turbo = "ON"
@@ -336,9 +256,10 @@ body {
 		document.getElementById("turbo").innerHTML = values.turbo + " (übernehmen)"
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 	}
+
 	function sliderChange()
 	{
-
+		clearInterval(interval)
 		values.timer = Math.round(document.getElementById("slider").value)
 		if (values.timer > 60)
 		{
@@ -354,24 +275,27 @@ body {
 	}
 	function slider2Change()
 	{
+		clearInterval(interval)
 		values.tempSoll = document.getElementById("slider2").value/2
 		document.getElementById("tempSoll").innerHTML = values.tempSoll + "°C (übernehmen)"
 		document.getElementById("submitBtn").value = JSON.stringify(values)
 
 	}
-	function sliderSpeedSilentChange()
+	function updateValues()
 	{
-		values.speedSilent = document.getElementById("sliderSpeedSilent").value
-		document.getElementById("submitBtn").value = JSON.stringify(values)
+		document.getElementById("tempSoll").innerHTML = "update"
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function(){
+			document.getElementById("tempSoll").innerHTML = "response"
+			pairs = this.responseText.split(";");
+			for(let i = 0; i < pairs.length; i++)
+			{
+				pair = pairs[i].split(':');
+				values[pair[0]] = pair[1];
+				UpdateAll();
+			}
+		}
+		xhttp.open("GET", "getValues", true);
+		xhttp.send();
 	}
-	function sliderSpeedTurboChange()
-	{
-		values.speedTurbo = document.getElementById("sliderSpeedTurbo").value
-		document.getElementById("submitBtn").value = JSON.stringify(values)
-	}
-	function Settings()
-	{
-		document.getElementById("settings").display = ""
-	}
-
 </script>
